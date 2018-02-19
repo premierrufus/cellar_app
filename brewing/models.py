@@ -1,6 +1,6 @@
 from django.db import models
+from django.utils import timezone
 
-# Create your models here.
 
 class MetaBase(models.Model):
     """
@@ -22,20 +22,61 @@ class MetaBase(models.Model):
 
 
 
+class Container(MetaBase):
+    '''
+    Tank, Barrel base class
+    '''
+    capacity = models.DecimalField("Equipment Capactiy", max_digits=5, 
+        decimal_places=2, help_text="""Maximum capacity of this container (in bbl).""")
+    notes = models.TextField("notes", blank=True, null=True)
+
+
+
+class Brix(models.Model):
+    value = models.DecimalField("Brix reading", max_digits=14, decimal_places=9, blank=True, null=True)
+    volume = models.DecimalField("@ volume", max_digits=14, decimal_places=9, blank=True, null=True)
+
+
+    def __str__(self):
+        return str(self.value) + "@" + str(self.volume)
+
+
+
 class Batch(models.Model):
     '''
     Batches are comprised of the following attributes:
     brewer = models.CharField(choices)
     gyle = models.IntegerField(should be a number, and should be sequential )
     recipe = models.ForeignKey('Recipe')
+    double_batch (boolean. Ticking this box creates a copy of the batch with the next sequential gyle)
     '''
-    double_batch = models.BooleanField('Double-batch?', default=False)
+
+    NAME = (
+        ("sean", "Sean"),
+        ("shea", "Shea"),
+        ("ian", "Ian"),
+        ("ron", "Ron"),
+        ("brandon", "Brandon")
+    )
+
+    brew_date = models.DateField(default=timezone.now, blank=True, null=True)
+    brewer = models.CharField("Brewer", max_length=100, choices=NAME, default="sean")
+    asst_brewer = models.CharField("Assistant Brewer", max_length=100, blank=True, null=True)
     gyle = models.PositiveSmallIntegerField('Gyle #', primary_key=True)
-    # recipe = models.ForeignKey('Recipe')
+    double_batch = models.BooleanField('Double-batch?', default=False, help_text="Tick this box to create a second batch on save.")
+    current_tank = models.ForeignKey(Container, related_name='current_batch_tank', default='', on_delete=models.CASCADE, blank=True, null=True)
+    recipe = models.ForeignKey('Recipe', default='', on_delete=models.CASCADE, blank=True, null=True)
+    brixes = models.ManyToManyField(Brix, blank=True, null=True, help_text="Zero or more brix readings")
+    notes = models.TextField("notes", blank=True, null=True)
+
+
+    def get_recipe(self):
+        return str(self.recipe)
+
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)  # Call the "real" save() method.
-        if self.double_batch == True:
+        if self.double_batch == True: # creates a duplicate record with the next sequential gyle #
             og_gyle = self.gyle
             self.pk = None
             self.gyle = og_gyle + 1
@@ -43,7 +84,8 @@ class Batch(models.Model):
 
 
     def __str__(self):
-        return str(self.gyle)
+        return str(self.gyle) + ": " + str(self.recipe)
+        #return str(self.gyle)
 
 
     class Meta:
@@ -273,9 +315,9 @@ class Recipe(MetaBase):
     strike_temperature = models.DecimalField("strike temperature", max_digits=5, decimal_places=2, help_text="Target strike temperature (F)")
     strike = models.DecimalField("strike", max_digits=5, decimal_places=2, help_text="Target strike value (Gal)")
     sparge = models.DecimalField("sparge", max_digits=5, decimal_places=2, help_text="Target sparge (Gal)")
-    ibu = models.DecimalField("IBU", max_digits=4, decimal_places=2, help_text="Target IBU")
-    abv = models.DecimalField("ABV", max_digits=4, decimal_places=2, help_text="Target ABV (%)")
-    srm = models.DecimalField("SRM", max_digits=4, decimal_places=2, help_text="Target SRM")
+    ibu = models.DecimalField("IBU", blank=True, null=True, max_digits=4, decimal_places=2, help_text="Target IBU")
+    abv = models.DecimalField("ABV", blank=True, null=True, max_digits=4, decimal_places=2, help_text="Target ABV (%)")
+    srm = models.DecimalField("SRM", blank=True, null=True, max_digits=4, decimal_places=2, help_text="Target SRM")
     hops = models.ManyToManyField(Hop, blank=True, null=True, help_text="Zero or more hops")
     fermentables = models.ManyToManyField(Fermentable, blank=True, null=True, help_text="Zero or more fermentable ingredients")
     salts = models.ManyToManyField(Salt, blank=True, null=True, help_text="Zero or more salts")
