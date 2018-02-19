@@ -29,17 +29,17 @@ class Batch(models.Model):
     gyle = models.IntegerField(should be a number, and should be sequential )
     recipe = models.ForeignKey('Recipe')
     '''
-    double_batch = models.BooleanField('Double-batch?')
+    double_batch = models.BooleanField('Double-batch?', default=False)
     gyle = models.PositiveSmallIntegerField('Gyle #', primary_key=True)
     # recipe = models.ForeignKey('Recipe')
 
-    def brew(self):
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the "real" save() method.
         if self.double_batch == True:
-            self.save()
-            self.gyle = None
-            self.save()
-        else:
-            self.save()
+            og_gyle = self.gyle
+            self.pk = None
+            self.gyle = og_gyle + 1
+            super().save(*args, **kwargs)  # Call the "real" save() method.
 
 
     def __str__(self):
