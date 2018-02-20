@@ -1,7 +1,19 @@
 from django.db import models
 from django.utils import timezone
 from decimal import *
-from brewing.models import Batch
+from brewing.models import Barrel, Batch
+
+
+# Global Model Variables
+
+PACKAGER_NAME = (
+    ("tyler", "Tyler"),
+    ("ron", "Ron"),
+    ("chris", "Chris"),
+    ("shea", "Shea"),
+    ("ian", "Ian"),
+    ("brandon", "Brandon")
+)
 
 
 # Global Packaging Methods
@@ -40,6 +52,9 @@ def get_many_objects(queryset):
     return ", ".join([str(p) for p in queryset])
 
 
+def one_year_from_now(y, m, d):
+    one_year_out = datetime.date(y + 1, m, d)
+    return one_year_out
 
 
 # Class Models
@@ -90,7 +105,7 @@ class Package(models.Model):
     )
 
     package_date = models.DateField(default=timezone.now, blank=True, verbose_name="Date Packaged")
-    packager = models.CharField("packager", max_length=100, choices=NAME, blank=True, null=True)
+    packager = models.CharField("packager", max_length=100, choices=PACKAGER_NAME, blank=True, null=True)
     format_type = models.CharField("Format", max_length=20, choices=TYPE, blank=True, null=True)
     format_qty = models.DecimalField("Packaged Units", max_digits=10, decimal_places=2,
         help_text="Total packaged quantity for this format in cases/units (NOT BBL).", blank=True, null=True)
@@ -129,5 +144,49 @@ class Package(models.Model):
 
     def __str__(self):
         return str(self.package_date) + ", " + str(self.the_recipe())
+
+
+class Aging(models.Model):
+    
+    NAME = (
+        ("tyler", "Tyler"),
+        ("ron", "Ron"),
+        ("chris", "Chris"),
+        ("shea", "Shea"),
+        ("ian", "Ian"),
+        ("brandon", "Brandon")
+    )
+
+
+    start_date = models.DateField(default=timezone.now, blank=True, verbose_name="Date Packaged")
+    end_date = models.DateField(blank=True, verbose_name="Age Until This Date",
+        default='')
+    batches = models.ManyToManyField('brewing.batch', help_text="Batches sourced.",
+        blank=True, null=True, verbose_name="Source Batches")
+    barrel = models.ForeignKey('brewing.barrel', on_delete=models.CASCADE, blank=True, null=True)
+    packager = models.CharField("packager", max_length=100, choices=NAME, blank=True, null=True)
+
+    
+
+    def get_batches(self):
+        if len(self.batches.all()) == 2:
+            return str(self.batches.first().gyle) + ", " + str(self.batches.last().gyle)
+        else:
+            return str(self.batches.first().gyle)
+    get_batches.short_description = 'Source Batch'
+
+
+    def the_recipe(self):
+        for batch in self.batches.all():
+            return batch.recipe
+    the_recipe.short_description = 'Source Recipe'
+
+
+    def __str__(self):
+        return str(self.barrel)
+
+
+
+
 
 

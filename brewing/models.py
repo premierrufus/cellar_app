@@ -24,21 +24,54 @@ class MetaBase(models.Model):
 
 class Container(MetaBase):
     '''
-    Tank, Barrel base class
+    Tank base class
     '''
+    
+    CONTAINER_TYPES = (
+        ("F", "Fermentation"),
+        ("B", "Brite"),
+        ("A", "Aging")
+    )
+
     capacity = models.DecimalField("Equipment Capactiy", max_digits=5, 
         decimal_places=2, help_text="""Maximum capacity of this container (in bbl).""")
+    container_type = models.CharField("Container Type", max_length=100, choices=CONTAINER_TYPES, default="F")
     notes = models.TextField("notes", blank=True, null=True)
 
 
 
-class Brix(models.Model):
-    value = models.DecimalField("Brix reading", max_digits=14, decimal_places=9, blank=True, null=True)
-    volume = models.DecimalField("@ volume", max_digits=14, decimal_places=9, blank=True, null=True)
 
+class Barrel(Container):
+    '''
+    Barrel class
+    '''
 
-    def __str__(self):
-        return str(self.value) + "@" + str(self.volume)
+    SPIRITS = (
+        ("B", "Bourbon"),
+        ("B/M", "Bourbon/Maple"),
+        ("G", "Gin"), 
+        ("R", "Rum"),
+        ("T", "Tequila"),
+        ("W", "Whiskey"),
+        ("SMW", "Single Malt Whiskey")
+    )
+
+    MANUFACTURERS = (
+        ("KC", "Kelvin Cooperage"),
+        ("BS", "Black Swan"),
+        ("U", "Unknown"),
+        ("O", "Other")
+    )
+
+    DISTILLERS = (
+        ("WR", "Woodfords Reserve"),
+        ("RD", "River Driver"),
+        ("MCD", "Maine Craft Distillery")
+    )
+
+    spirit_profile = models.CharField("Spirit profile", max_length=100, choices=SPIRITS, default="B/M")
+    manufacturer = models.CharField("Manufacturer", max_length=100, choices=MANUFACTURERS, blank=True, null=True)
+    distiller = models.CharField("Distiller", max_length=100, choices=DISTILLERS, blank=True, null=True)
 
 
 
@@ -59,6 +92,12 @@ class Batch(models.Model):
         ("brandon", "Brandon")
     )
 
+    YEAST_TYPES = (
+        ("001", "001"),
+        ("3470", "3470"),
+        ("other", "Other")
+    )
+
     brew_date = models.DateField(default=timezone.now, blank=True, null=True)
     brewer = models.CharField("Brewer", max_length=100, choices=NAME, default="sean")
     asst_brewer = models.CharField("Assistant Brewer", max_length=100, blank=True, null=True)
@@ -66,8 +105,15 @@ class Batch(models.Model):
     double_batch = models.BooleanField('Double-batch?', default=False, help_text="Tick this box to create a second batch on save.")
     current_tank = models.ForeignKey(Container, related_name='current_batch_tank', default='', on_delete=models.CASCADE, blank=True, null=True)
     recipe = models.ForeignKey('Recipe', default='', on_delete=models.CASCADE, blank=True, null=True)
-    brixes = models.ManyToManyField(Brix, blank=True, null=True, help_text="Zero or more brix readings")
-    notes = models.TextField("notes", blank=True, null=True)
+    yeast_type = models.CharField("Yeast Type", max_length=100, choices=YEAST_TYPES, default="001")
+    yeast_gen = models.CharField("Yeast Generation", max_length=100, blank=True, null=True)
+    yeast_origin_gyle = models.CharField("Yeast Origin Gyle", max_length=100, blank=True, null=True)
+    yeast_log = models.TextField("Yeast Log", blank=True, null=True, help_text="Enter yeast notes here.")
+    brix_log = models.TextField("Brix Log", blank=True, null=True, help_text="Enter Brix readings/notes here.")
+    transfer_log = models.TextField("Transfer Log", blank=True, null=True, help_text="Enter transfer notes here.")
+    gravity_log = models.TextField("Gravity Log", blank=True, null=True, help_text="Enter gravity readings here.")
+    cellaring_log = models.TextField("Cellaring Log", blank=True, null=True, help_text="Enter any cellaring notes here.")
+    notes = models.TextField("Batch Notes", blank=True, null=True, help_text="Enter batch notes here.")
 
 
     def get_recipe(self):
@@ -109,7 +155,7 @@ class Fermentable(MetaBase):
     
     # NOTE: type is a reserved python word.
     ferm_type = models.CharField("fermentable type", max_length=12, choices=TYPE)
-    amount = models.DecimalField("amount", max_digits=14, decimal_places=9, help_text="Weight of the fermentable, extract or sugar in pounds.")
+    amount = models.DecimalField("amount", max_digits=14, decimal_places=2, help_text="Weight of the fermentable, extract or sugar in pounds.")
     # NOTE: yield is a reserved python word.
     ferm_yield = models.DecimalField("yield percentage", max_digits=14, 
             decimal_places=9, blank=True, null=True, help_text="""Percent dry yield (fine grain) 
@@ -154,6 +200,10 @@ class Fermentable(MetaBase):
             field (in pounds) and divide by the number of gallons in the batch. 
             Based on a sixty minute boil. Only suitable for use with an "Extract" type, 
             otherwise this value is ignored.""")
+
+
+    def __str__(self):
+        return str(self.amount) + "# " + self.name
     
 
     
@@ -170,12 +220,16 @@ class Hop(MetaBase):
         ("@ Second Dry-Hop", "@ Second Dry-Hop")
     )
 
-    amount = models.DecimalField("amount", max_digits=14, decimal_places=9,
+    amount = models.DecimalField("amount", max_digits=14, decimal_places=2,
             help_text="Weight in pounds of the hops used in the recipe.")
     use = models.CharField("usage", max_length=50, choices=USE,
             help_text="""The phase at which this hop is added.""")
     notes = models.TextField("notes", blank=True, null=True)
     origin = models.CharField("origin", max_length=100, blank=True, null=True)
+
+
+    def __str__(self):
+        return str(self.amount) + "# " + self.name + self.use
 
 
 
@@ -184,9 +238,12 @@ class Salt(MetaBase):
     The “Salt” identifier is used to define all varieties of salts.
     """
 
-    amount = models.DecimalField("amount", max_digits=14, decimal_places=9,
+    amount = models.DecimalField("amount", max_digits=14, decimal_places=2,
             help_text="Weight in ounces of the salt used in the recipe.")
     notes = models.TextField("notes", blank=True, null=True)
+
+    def __str__(self):
+        return str(self.amount) + "# " + self.name
 
 
 
@@ -217,7 +274,7 @@ class Misc(MetaBase):
     use = models.CharField("hop use", max_length=12, choices=USE, default=2)
     time = models.DecimalField("time", max_digits=14, decimal_places=9,
             help_text="Amount of time the misc was boiled, steeped, mashed, etc in minutes.")
-    amount = models.DecimalField("yield percentage", max_digits=14, decimal_places=9,
+    amount = models.DecimalField("yield percentage", max_digits=14, decimal_places=2,
             help_text="""Amount of item used. The default measurements are by weight, 
             but this may be the measurement in volume units if AMOUNT_IS_WEIGHT is set 
             to TRUE for this record. For liquid items this is liters, for solid the  
@@ -229,6 +286,10 @@ class Misc(MetaBase):
             help_text="Short description of what the ingredient is used for in text")
     notes = models.TextField("notes", blank=True, null=True,
             help_text="Detailed notes on the item including usage.")
+
+
+    def __str__(self):
+        return str(self.amount) + "# " + self.name
 
     
     
@@ -262,7 +323,7 @@ class Yeast(MetaBase):
     # NOTE: type is a reserved python word.
     yeast_type = models.CharField("yeast type", max_length=12, choices=TYPE, default=1)
     form = models.CharField("yeast form", max_length=12, choices=FORM, default=1)
-    amount = models.DecimalField("amount", max_digits=14, decimal_places=9,
+    amount = models.DecimalField("amount", max_digits=14, decimal_places=2,
             help_text="""The amount of yeast, measured in liters. For a starter this is the 
             size of the starter. If the flag AMOUNT_IS_WEIGHT is set to TRUE then this 
             measurement is in kilograms and not liters.""")
@@ -302,6 +363,9 @@ class Yeast(MetaBase):
             fermentation as opposed to the primary fermentation. Useful if one uses two              
             or more yeast strains for a single brew (eg: Lambic). Default value is FALSE.""")
 
+
+    def __str__(self):
+        return str(self.amount) + "# " + self.name
 
 
 class Recipe(MetaBase):
