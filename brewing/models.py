@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.db.models import Q
 
 # For post-batch save signalling
 from django.db.models.signals import post_save
@@ -43,7 +44,6 @@ class Container(MetaBase):
         decimal_places=2, help_text="""Maximum capacity of this container (in bbl).""")
     container_type = models.CharField("Container Type", max_length=100, choices=CONTAINER_TYPES, default="F")
     notes = models.TextField("notes", blank=True, null=True)
-
 
 
 
@@ -163,22 +163,30 @@ class Batch(models.Model):
         ("other", "Other")
     )
 
-    brew_date = models.DateField(default=timezone.now, blank=True, null=True)
+    brew_date = models.DateField(blank=True, default=timezone.now, null=True)
     brewer = models.CharField("Brewer", max_length=100, choices=NAME, default="sean")
     asst_brewer = models.CharField("Assistant Brewer", max_length=100, blank=True, null=True)
     gyle = models.PositiveSmallIntegerField('Gyle #', primary_key=True)
-    double_batch = models.BooleanField('Double-batch?', default=False, help_text="Tick this box to create a second batch on save.")
-    current_tank = models.ForeignKey(Container, related_name='current_batch_tank', default='', verbose_name="Ferm. Tank", on_delete=models.CASCADE, blank=True, null=True)
-    recipe = models.ForeignKey('Recipe', default='', on_delete=models.CASCADE, blank=True, null=True)
-    brix_log = models.ManyToManyField(Brix, blank=True, null=True, help_text="Zero or more brix entries")
-    gravity_log = models.ManyToManyField(Gravity, blank=True, null=True, help_text="Zero or more gravity entries")
-    transfer_log = models.ManyToManyField(Transfer, blank=True, null=True, help_text="Zero or more transfer entries")
+    recipe = models.ForeignKey('Recipe', default='', on_delete=models.CASCADE)
+    double_batch = models.BooleanField('Is this a double-batch?', default=False, help_text="Tick this box to create a second batch on save.")
+    ferm_tank = models.ForeignKey(Container, limit_choices_to={'container_type': 'F'}, related_name='batch_ferm_tank', default='', verbose_name="Fermentation Tank", on_delete=models.CASCADE)
+    transfer_tank = models.ForeignKey(Container, limit_choices_to=Q(container_type='B') | Q(container_type='A'),
+        default='', verbose_name="Transfer Tank", on_delete=models.CASCADE, blank=True, null=True)
+    transfer_date = models.DateField(blank=True, default=timezone.now, null=True)
+    pre_transfer_vol = models.DecimalField("Pre Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Pre Transfer Batch Volume.")
+    post_transfer_vol = models.DecimalField("Post Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Post Transfer Batch Volume.")
+    plato_1_val = models.DecimalField("Initial Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Initial Plato Reading.")
+    plato_1_vol = models.DecimalField("Initial Plato Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Initial Plato Volume.")
+    plato_2_val = models.DecimalField("Second Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Second Plato Reading.")
+    plato_2_vol = models.DecimalField("Second Reading Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Second Reading Volume.")
+    plato_3_val = models.DecimalField("Final Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final Plato Reading.")
+    plato_3_vol = models.DecimalField("Final Reading Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final Reading Volume.")    
+    final_gravity = models.DecimalField("Final gravity", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final gravity.")
+    attenuation = models.DecimalField("Attenuation %", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Attenuation %.")
+    final_abv = models.DecimalField("Final abv", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final abv.")
+    transfer_log = models.TextField("Transfer Log", blank=True, null=True, help_text="Enter any transfer notes here.")
     cellaring_log = models.TextField("Cellaring Log", blank=True, null=True, help_text="Enter any cellaring notes here.")
     notes = models.TextField("Batch Notes", blank=True, null=True, help_text="Enter batch notes here.")
-    yeast_type = models.CharField("Yeast Type", max_length=100, choices=YEAST_TYPES, default="001")
-    yeast_gen = models.CharField("Yeast Generation", max_length=100, blank=True, null=True)
-    yeast_origin_gyle = models.CharField("Yeast Origin Gyle", max_length=100, blank=True, null=True)
-    yeast_log = models.TextField("Yeast Log", blank=True, null=True, help_text="Enter yeast notes here.")
     cdt = models.DateTimeField("created", editable=False, auto_now_add=True)
     mdt = models.DateTimeField("modified", editable=False, auto_now=True)
 
