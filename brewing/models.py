@@ -1,6 +1,12 @@
 from django.db import models
 from django.utils import timezone
 
+# For post-batch save signalling
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+from django.dispatch import receiver
+
+
 
 class MetaBase(models.Model):
     """
@@ -75,6 +81,65 @@ class Barrel(Container):
 
 
 
+class Entry(models.Model):
+    '''
+    Defines the entry class
+    '''
+    TYPE = (
+        ("B", "Brix"),
+        ("G", "Gravity"),
+        ("T", "Transfer")
+    )
+
+    date = models.DateField(default=timezone.now, blank=True, null=True)
+
+
+    def __str__(self):
+        return str(self.date)
+
+
+
+class Brix(Entry):
+    '''
+    Defines a brix reading:
+    value (degrees brix) @ volume
+    '''
+    value = models.DecimalField("Degrees Brix", max_digits=14, decimal_places=2, help_text="Sugar content of an aqueous solution.")
+    volume = models.DecimalField("Batch Volume (Hl)", max_digits=14, decimal_places=2, help_text="Batch volume at the time of this reading.")
+
+
+    def __str__(self):
+        return str(self.value) + " @ " + str(self.volume) + "(Hl)"
+
+
+
+class Gravity(Entry):
+    '''
+    Defines a gravity reading:
+    date, gravity
+    '''
+    value = models.DecimalField("Specific Gravity", max_digits=14, decimal_places=2, help_text="Specific Gravity/Relative Density.")
+
+
+    def __str__(self):
+        return str(self.value) + " | " + str(self.date)
+
+
+
+class Transfer(Entry):
+    '''
+    Defines a transfer entry
+    '''
+    container = models.ForeignKey(Container, related_name='transfer_tank', on_delete=models.CASCADE, default='')
+    cip = models.BooleanField('CIP?', default=False, help_text="Tick this box if the container was cleaned prior to transfer.")
+    volume = models.DecimalField("Batch Volume (Hl)", max_digits=14, decimal_places=2, blank=True, null=True, help_text="Batch volume at the time of transfer.")
+
+
+    def __str__(self):
+        return str(self.date) + ", " + str(self.container) + ", CIP: " + str(self.cip)
+
+
+
 class Batch(models.Model):
     '''
     Batches are comprised of the following attributes:
@@ -103,17 +168,19 @@ class Batch(models.Model):
     asst_brewer = models.CharField("Assistant Brewer", max_length=100, blank=True, null=True)
     gyle = models.PositiveSmallIntegerField('Gyle #', primary_key=True)
     double_batch = models.BooleanField('Double-batch?', default=False, help_text="Tick this box to create a second batch on save.")
-    current_tank = models.ForeignKey(Container, related_name='current_batch_tank', default='', on_delete=models.CASCADE, blank=True, null=True)
+    current_tank = models.ForeignKey(Container, related_name='current_batch_tank', default='', verbose_name="Ferm. Tank", on_delete=models.CASCADE, blank=True, null=True)
     recipe = models.ForeignKey('Recipe', default='', on_delete=models.CASCADE, blank=True, null=True)
+    brix_log = models.ManyToManyField(Brix, blank=True, null=True, help_text="Zero or more brix entries")
+    gravity_log = models.ManyToManyField(Gravity, blank=True, null=True, help_text="Zero or more gravity entries")
+    transfer_log = models.ManyToManyField(Transfer, blank=True, null=True, help_text="Zero or more transfer entries")
+    cellaring_log = models.TextField("Cellaring Log", blank=True, null=True, help_text="Enter any cellaring notes here.")
+    notes = models.TextField("Batch Notes", blank=True, null=True, help_text="Enter batch notes here.")
     yeast_type = models.CharField("Yeast Type", max_length=100, choices=YEAST_TYPES, default="001")
     yeast_gen = models.CharField("Yeast Generation", max_length=100, blank=True, null=True)
     yeast_origin_gyle = models.CharField("Yeast Origin Gyle", max_length=100, blank=True, null=True)
     yeast_log = models.TextField("Yeast Log", blank=True, null=True, help_text="Enter yeast notes here.")
-    brix_log = models.TextField("Brix Log", blank=True, null=True, help_text="Enter Brix readings/notes here.")
-    transfer_log = models.TextField("Transfer Log", blank=True, null=True, help_text="Enter transfer notes here.")
-    gravity_log = models.TextField("Gravity Log", blank=True, null=True, help_text="Enter gravity readings here.")
-    cellaring_log = models.TextField("Cellaring Log", blank=True, null=True, help_text="Enter any cellaring notes here.")
-    notes = models.TextField("Batch Notes", blank=True, null=True, help_text="Enter batch notes here.")
+    cdt = models.DateTimeField("created", editable=False, auto_now_add=True)
+    mdt = models.DateTimeField("modified", editable=False, auto_now=True)
 
 
     def get_recipe(self):
@@ -121,12 +188,15 @@ class Batch(models.Model):
 
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Call the "real" save() method.
-        if self.double_batch == True: # creates a duplicate record with the next sequential gyle #
-            og_gyle = self.gyle
-            self.pk = None
-            self.gyle = og_gyle + 1
+        if self.cdt == self.mdt:
             super().save(*args, **kwargs)  # Call the "real" save() method.
+            if self.double_batch == True: # creates a duplicate record with the next sequential gyle #
+                og_gyle = self.gyle
+                self.pk = None
+                self.gyle = og_gyle + 1
+                super().save(*args, **kwargs)  # Call the "real" save() method.
+        else:
+            super().save(*args, **kwargs)  # Call the "real" save() method. 
 
 
     def __str__(self):
@@ -225,11 +295,11 @@ class Hop(MetaBase):
     use = models.CharField("usage", max_length=50, choices=USE,
             help_text="""The phase at which this hop is added.""")
     notes = models.TextField("notes", blank=True, null=True)
-    origin = models.CharField("origin", max_length=100, blank=True, null=True)
 
 
     def __str__(self):
         return str(self.amount) + "# " + self.name + self.use
+
 
 
 
