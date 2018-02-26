@@ -175,6 +175,7 @@ class Batch(models.Model):
     transfer_date = models.DateField(blank=True, default=timezone.now, null=True)
     pre_transfer_vol = models.DecimalField("Pre Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Pre Transfer Batch Volume.")
     post_transfer_vol = models.DecimalField("Post Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Post Transfer Batch Volume.")
+    transfer_cip = models.BooleanField('CIP?', default=False, help_text="Tick this box if the destination container was cleaned prior to transfer.")
     plato_1_val = models.DecimalField("Initial Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Initial Plato Reading.")
     plato_1_vol = models.DecimalField("Initial Plato Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Initial Plato Volume.")
     plato_2_val = models.DecimalField("Second Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Second Plato Reading.")
@@ -245,39 +246,6 @@ class Fermentable(MetaBase):
     origin = models.CharField("origin country", max_length=100, blank=True, null=True)
     supplier = models.TextField("supplier", blank=True, null=True)
     notes = models.TextField("notes", blank=True, null=True)
-    coarse_fine_diff = models.DecimalField("coarse/fine percentage", max_digits=14, 
-            decimal_places=9, blank=True, null=True, help_text="""Percent difference 
-            between the coarse grain yield and fine grain yield.  Only appropriate for 
-            a "Grain" or "Adjunct" type, otherwise this value is ignored.""")
-    moisture = models.DecimalField("moisture percentage", max_digits=14, 
-            decimal_places=9, blank=True, null=True, help_text="""Percent 
-            moisture in the grain. Only appropriate for a "Grain" or "Adjunct" type, 
-            otherwise this value is ignored.""")
-    diastatic_power = models.DecimalField("diastatic power", max_digits=14, 
-            decimal_places=9, blank=True, null=True, help_text="""The diastatic power 
-            of the grain as measured in "Lintner" units. Only appropriate for a 
-            "Grain" or "Adjunct" type, otherwise this value is ignored.""")
-    protein = models.DecimalField("protein percentage", max_digits=14, 
-            decimal_places=9, blank=True, null=True, help_text="""The percent 
-            protein in the grain. Only appropriate for a "Grain" or "Adjunct" type, 
-            otherwise this value is ignored.""")
-    max_in_batch = models.DecimalField("max percentage per batch", max_digits=14, 
-            decimal_places=9, blank=True, null=True, help_text="""The recommended 
-            maximum percentage (by weight) this ingredient should represent in a 
-            batch of beer.""")
-    recommend_mash = models.NullBooleanField("recommended mash", default=False, 
-            blank=True, null=True, help_text="""True if it is recommended the grain 
-            be mashed, False if it can be steeped. A value of True is only appropriate 
-            for a "Grain" or "Adjunct" types. The default value is False. Note that 
-            this does NOT indicate whether the grain is mashed or not – it is only 
-            a recommendation used in recipe formulation.""")
-    ibu_gal_per_lb = models.DecimalField("bitterness (IBU*gal/lb)", max_digits=14, 
-            decimal_places=9, blank=True, null=True, help_text="""For hopped extracts 
-            only - an estimate of the number of IBUs per pound of extract in a gallon 
-            of water. To convert to IBUs we multiply this number by the "Amount" 
-            field (in pounds) and divide by the number of gallons in the batch. 
-            Based on a sixty minute boil. Only suitable for use with an "Extract" type, 
-            otherwise this value is ignored.""")
 
 
     def __str__(self):
@@ -321,7 +289,7 @@ class Salt(MetaBase):
     notes = models.TextField("notes", blank=True, null=True)
 
     def __str__(self):
-        return str(self.amount) + "# " + self.name
+        return str(self.amount) + "oz " + self.name
 
 
 

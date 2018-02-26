@@ -1,13 +1,11 @@
 from django.contrib import admin
 #from django.contrib.admin import AdminSite
-from .models import Batch, Barrel, Gravity, Transfer, Container, Fermentable, Hop, Salt, Misc, Yeast, Recipe
+from .models import Batch, Barrel, Container, Fermentable, Hop, Salt, Misc, Yeast, Recipe
 # Register your models here.
 
 
 admin.site.register(Barrel)
 admin.site.register(Fermentable)
-admin.site.register(Transfer)
-admin.site.register(Gravity)
 admin.site.register(Salt)
 admin.site.register(Misc)
 admin.site.register(Yeast)
@@ -31,7 +29,7 @@ class BatchAdmin(admin.ModelAdmin):
         }),
         ('Transfer Data', {
             'classes': ('collapse',),
-            'fields': ('pre_transfer_vol', 'post_transfer_vol', 'transfer_tank', 'transfer_log')
+            'fields': ('pre_transfer_vol', 'post_transfer_vol', 'transfer_cip', 'transfer_tank', 'transfer_log')
         }),
         ('Logs', {
             'classes': ('collapse',),
