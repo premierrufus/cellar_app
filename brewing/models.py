@@ -169,7 +169,7 @@ class Batch(models.Model):
     gyle = models.PositiveSmallIntegerField('Gyle #', primary_key=True)
     recipe = models.ForeignKey('Recipe', default='', on_delete=models.CASCADE)
     double_batch = models.BooleanField('Is this a double-batch?', default=False, help_text="Tick this box to create a second batch on save.")
-    ferm_tank = models.ForeignKey(Container, limit_choices_to={'container_type': 'F'}, related_name='batch_ferm_tank', default='', verbose_name="Fermentation Tank", on_delete=models.CASCADE)
+    ferm_tank = models.ForeignKey(Container, limit_choices_to={'container_type': 'F'}, related_name='batch_ferm_tank', default='', verbose_name="Fermentation Tank", on_delete=models.CASCADE, blank=True, null=True)
     transfer_tank = models.ForeignKey(Container, limit_choices_to=Q(container_type='B') | Q(container_type='A'),
         default='', verbose_name="Transfer Tank", on_delete=models.CASCADE, blank=True, null=True)
     transfer_date = models.DateField(blank=True, default=timezone.now, null=True)
@@ -265,9 +265,17 @@ class Hop(MetaBase):
         ("@ First Dry-Hop", "@ First Dry-Hop"),
         ("@ Second Dry-Hop", "@ Second Dry-Hop")
     )
+    
+    UNITS = (
+        ("LB", "Pounds(lb)"),
+        ("BU", "Bittering Units(BU)"),
+    )
+
 
     amount = models.DecimalField("amount", max_digits=14, decimal_places=2,
             help_text="Weight in pounds of the hops used in the recipe.")
+    amt_units = models.CharField("Units", max_length=50, choices=USE,
+            help_text="""The unit of measure used for this hop instance.""", default="LB")
     use = models.CharField("usage", max_length=50, choices=USE,
             help_text="""The phase at which this hop is added.""")
     notes = models.TextField("notes", blank=True, null=True)
