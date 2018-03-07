@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
+from django.urls import reverse
 
 
 
@@ -59,6 +60,9 @@ class Container(MetaBase):
     True
     '''
 
+    def get_absolute_url(self):
+        return reverse('container-detail', args=[str(self.id)])
+
 
     def get_contents(self):
         # first check if this tank is a Transfer tank (B or C)
@@ -78,6 +82,40 @@ class Container(MetaBase):
             return str(self.batch_ferm_tank.last())
     get_contents.short_description = 'Current Contents'
 
+
+    def get_gyles(self):
+        # first check if this tank is a Transfer tank (B or C)
+        if len(self.batch_ferm_tank.all()) == 0:
+            if len(self.batch_transfer_tank.all()) == 0:
+                return str('No current batch data')
+            else:
+                if self.batch_transfer_tank.last().double_batch:
+                    return str(self.batch_transfer_tank.latest('brew_date').gyle) + ', ' + str(self.batch_transfer_tank.last().gyle)
+                else:
+                    return str(self.batch_transfer_tank.last().gyle)       
+        elif self.batch_ferm_tank.last().double_batch:
+            return str(self.batch_ferm_tank.latest('brew_date').gyle) + ', ' + str(self.batch_ferm_tank.last().gyle)
+            # if it doesnt', then it's an F Tank.
+            # check if the most recent batch is a double batch
+        else:
+            return str(self.batch_ferm_tank.last().gyle)
+    get_contents.short_description = 'Current Contents'
+
+
+    def get_recipe(self):
+        if self.batch_ferm_tank.last():
+            return self.batch_ferm_tank.last().recipe.name
+        else:
+            return str('No current recipe data')
+    get_recipe.short_description = 'Current Recipe'
+
+
+    def get_mash_temp(self):
+        if self.batch_ferm_tank.last():
+            return self.batch_ferm_tank.last().mash_temperature
+        else:
+            return str('No current mash data')
+    get_mash_temp.short_description = 'Current Mash Temp'
 
 
     def get_current_batch(self):
