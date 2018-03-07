@@ -142,8 +142,13 @@ class Package(models.Model):
             return batch.gyle
     the_batches.short_description = 'Source Batch'
 
+
     def __str__(self):
         return str(self.package_date) + ", " + str(self.the_recipe())
+
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the "real" save() method. 
 
 
 class Aging(models.Model):

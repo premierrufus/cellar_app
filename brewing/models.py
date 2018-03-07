@@ -66,7 +66,10 @@ class Container(MetaBase):
             if len(self.batch_transfer_tank.all()) == 0:
                 return str('No current batch data')
             else:
-                return str(self.batch_transfer_tank.last())
+                if self.batch_transfer_tank.last().double_batch:
+                    return str(self.batch_transfer_tank.latest('brew_date')) + ', ' + str(self.batch_transfer_tank.last())
+                else:
+                    return str(self.batch_transfer_tank.last())       
         elif self.batch_ferm_tank.last().double_batch:
             return str(self.batch_ferm_tank.latest('brew_date')) + ', ' + str(self.batch_ferm_tank.last())
             # if it doesnt', then it's an F Tank.

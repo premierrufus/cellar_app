@@ -1,6 +1,9 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 #from django.contrib.admin import AdminSite
+from django.shortcuts import render
 from .models import Batch, Barrel, Container, Fermentable, Hop, Salt, Misc, Yeast, Recipe
+
+from brewing.forms import TransferForm
 # Register your models here.
 
 
@@ -13,10 +16,10 @@ admin.site.register(Recipe)
 
 @admin.register(Batch)
 class BatchAdmin(admin.ModelAdmin):
-	list_display = ('gyle', 'recipe', 'brew_date', 'brewer', 'ferm_tank')
-	fieldsets = (
+    list_display = ('gyle', 'recipe', 'brew_date', 'brewer', 'ferm_tank', 'transfer_tank')
+    fieldsets = (
         ('Batch Data', {
-        	'classes': ('wide',),
+            'classes': ('wide',),
             'fields': (
                 'double_batch',
                 'brew_date',
@@ -52,13 +55,32 @@ class BatchAdmin(admin.ModelAdmin):
             'fields': ('cellaring_log', 'notes')
         })
     )
+    actions = ['set_transfer_tank']
+
+
+    def set_transfer_tank(modeladmin, request, queryset):
+        if 'do_action' in request.POST:
+            form = TransferForm(request.POST)
+            if form.is_valid():
+                transfer_tank = form.cleaned_data['transfer_tank']
+                updated = queryset.update(transfer_tank=transfer_tank)
+                messages.success(request, '{0} batches were updated'.format(updated))
+                return
+        else:
+            form = TransferForm()
+
+        return render(request, 'admin/brewing/action_transfer.html',
+            {'title': u'Choose tank',
+            'objects': queryset,
+            'form': form})
+    set_transfer_tank.short_description = u'Transfer selected batches'
 
 
 @admin.register(Hop)
 class HopAdmin(admin.ModelAdmin):
-	pass
+    pass
 
 
 @admin.register(Container)
 class ContainerAdmin(admin.ModelAdmin):
-	list_display = ('name', 'container_type', 'capacity', 'get_contents')
+    list_display = ('name', 'container_type', 'capacity', 'get_contents')

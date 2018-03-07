@@ -56,7 +56,7 @@ ROOT_URLCONF = 'brewery.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': ['templates', '/home/helperbot/brewery/templates'],
         'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
