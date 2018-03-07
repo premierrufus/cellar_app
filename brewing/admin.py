@@ -17,19 +17,35 @@ class BatchAdmin(admin.ModelAdmin):
 	fieldsets = (
         ('Batch Data', {
         	'classes': ('wide',),
-            'fields': ('double_batch', 'gyle', 'recipe', 'ferm_tank', 'brewer', 'asst_brewer')
+            'fields': (
+                'double_batch',
+                'brew_date',
+                'gyle',
+                'recipe', 
+                'ferm_tank', 
+                'brewer',
+                'asst_brewer',
+                'mash_temperature',
+                'preboil_gravity',
+                'preboil_volume',
+                'postboil_gravity',
+                'postboil_volume',
+                'final_gravity', 
+                'attenuation', 
+                'final_abv', 
+                'first_dry_hop',
+                'second_dry_hop',
+                'd_rest'
+            )
         }),
-        ('Final Gravity/Attenuation/ABV', {
+
+        ('Gravity Log', {
             'classes': ('collapse',),
-            'fields': ('final_gravity', 'attenuation', 'final_abv')
-        }),
-        ('Plato', {
-            'classes': ('collapse',),
-            'fields': (('plato_1_val', 'plato_1_vol'), ('plato_2_val', 'plato_2_vol'), ('plato_3_val', 'plato_3_vol'))
+            'fields': (('gravity_1', 'gravity_1_date'), ('gravity_2', 'gravity_2_date'), ('gravity_3', 'gravity_3_date'))
         }),
         ('Transfer Data', {
             'classes': ('collapse',),
-            'fields': ('pre_transfer_vol', 'post_transfer_vol', 'transfer_cip', 'transfer_tank', 'transfer_log')
+            'fields': ('pre_transfer_vol', 'post_transfer_vol', 'transfer_cip', 'transfer_date', 'transfer_tank', 'transfer_log')
         }),
         ('Logs', {
             'classes': ('collapse',),
@@ -45,4 +61,4 @@ class HopAdmin(admin.ModelAdmin):
 
 @admin.register(Container)
 class ContainerAdmin(admin.ModelAdmin):
-	list_display = ('name', 'container_type', 'capacity')
+	list_display = ('name', 'container_type', 'capacity', 'get_contents')

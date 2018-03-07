@@ -45,6 +45,52 @@ class Container(MetaBase):
     container_type = models.CharField("Container Type", max_length=100, choices=CONTAINER_TYPES, default="F")
     notes = models.TextField("notes", blank=True, null=True)
 
+    '''
+    >>> b1.batch_transfer_tank.last().double_batch
+    False
+    >>> b1.batch_transfer_tank.last().gyle
+    403
+    
+    >>> f7.batch_ferm_tank.last()
+    <Batch: 402: Veridian>
+    >>> f7.batch_ferm_tank.latest('brew_date')
+    <Batch: 401: Veridian>
+    >>> f7.batch_ferm_tank.latest('brew_date').double_batch
+    True
+    '''
+
+
+    def get_contents(self):
+        # first check if this tank is a Transfer tank (B or C)
+        if len(self.batch_ferm_tank.all()) == 0:
+            if len(self.batch_transfer_tank.all()) == 0:
+                return str('No current batch data')
+            else:
+                return str(self.batch_transfer_tank.last())
+        elif self.batch_ferm_tank.last().double_batch:
+            return str(self.batch_ferm_tank.latest('brew_date')) + ', ' + str(self.batch_ferm_tank.last())
+            # if it doesnt', then it's an F Tank.
+            # check if the most recent batch is a double batch
+        else:
+            return str(self.batch_ferm_tank.last())
+    get_contents.short_description = 'Current Contents'
+
+
+
+    def get_current_batch(self):
+        if len(self.batch_transfer_tank.all()) > 0:
+            return str(self.batch_transfer_tank.last())
+        else:
+            if self.batch_ferm_tank.last() != self.batch_ferm_tank.latest('brew_date'): # ensures double batches both appear in the admin
+                return str(self.batch_ferm_tank.latest('brew_date')) + ', ' + str(self.batch_ferm_tank.last())
+            else:
+                return str(self.batch_ferm_tank.latest('brew_date'))
+    get_current_batch.short_description = 'Current Contents'
+
+
+    class Meta:
+        ordering = ['-name']
+
 
 
 class Barrel(Container):
@@ -168,20 +214,38 @@ class Batch(models.Model):
     asst_brewer = models.CharField("Assistant Brewer", max_length=100, blank=True, null=True)
     gyle = models.PositiveSmallIntegerField('Gyle #', primary_key=True)
     recipe = models.ForeignKey('Recipe', default='', on_delete=models.CASCADE)
-    double_batch = models.BooleanField('Is this a double-batch?', default=False, help_text="Tick this box to create a second batch on save.")
-    ferm_tank = models.ForeignKey(Container, limit_choices_to={'container_type': 'F'}, related_name='batch_ferm_tank', default='', verbose_name="Fermentation Tank", on_delete=models.CASCADE, blank=True, null=True)
+    mash_temperature = models.DecimalField("Mash Temperature", max_digits=5, decimal_places=2, blank=True, null=True, 
+        help_text="Mash Temperature")
+    preboil_gravity = models.DecimalField("Pre Boil Gravity", max_digits=5, decimal_places=2, blank=True, null=True, 
+        help_text="Pre Boil Gravity")
+    preboil_volume = models.DecimalField("Pre Boil Volume", max_digits=5, decimal_places=2, blank=True, null=True, 
+        help_text="Pre Boil Volume")
+    postboil_gravity = models.DecimalField("Post Boil Gravity", max_digits=5, decimal_places=2, blank=True, null=True, 
+        help_text="Post Boil Gravity")
+    postboil_volume = models.DecimalField("Post Boil Volume", max_digits=5, decimal_places=2, blank=True, null=True, 
+        help_text="Post Boil Volume")
+    double_batch = models.BooleanField('Is this a double-batch?', default=False, 
+        help_text="Tick this box to create a second batch on save.")
+    ferm_tank = models.ForeignKey(Container, limit_choices_to={'container_type': 'F'}, related_name='batch_ferm_tank', default='', 
+        verbose_name="Fermentation Tank", on_delete=models.CASCADE, blank=True, null=True)
     transfer_tank = models.ForeignKey(Container, limit_choices_to=Q(container_type='B') | Q(container_type='A'),
-        default='', verbose_name="Transfer Tank", on_delete=models.CASCADE, blank=True, null=True)
+        default='', related_name='batch_transfer_tank', verbose_name="Transfer Tank", on_delete=models.CASCADE, blank=True, null=True)
     transfer_date = models.DateField(blank=True, default=timezone.now, null=True)
-    pre_transfer_vol = models.DecimalField("Pre Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Pre Transfer Batch Volume.")
-    post_transfer_vol = models.DecimalField("Post Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Post Transfer Batch Volume.")
-    transfer_cip = models.BooleanField('CIP?', default=False, help_text="Tick this box if the destination container was cleaned prior to transfer.")
-    plato_1_val = models.DecimalField("Initial Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Initial Plato Reading.")
-    plato_1_vol = models.DecimalField("Initial Plato Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Initial Plato Volume.")
-    plato_2_val = models.DecimalField("Second Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Second Plato Reading.")
-    plato_2_vol = models.DecimalField("Second Reading Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Second Reading Volume.")
-    plato_3_val = models.DecimalField("Final Plato Reading", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final Plato Reading.")
-    plato_3_vol = models.DecimalField("Final Reading Volume", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final Reading Volume.")    
+    pre_transfer_vol = models.DecimalField("Pre Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, 
+        help_text="Pre Transfer Batch Volume.")
+    post_transfer_vol = models.DecimalField("Post Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, 
+        help_text="Post Transfer Batch Volume.")
+    transfer_cip = models.BooleanField('CIP?', default=False, 
+        help_text="Tick this box if the destination container was cleaned prior to transfer.")
+    first_dry_hop = models.DateField(blank=True, default=timezone.now, null=True)
+    second_dry_hop = models.DateField(blank=True, default=timezone.now, null=True)
+    d_rest = models.DateField(blank=True, default=timezone.now, null=True)
+    gravity_1 = models.DecimalField("Gravity Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter a gravity (plato).")
+    gravity_1_date = models.DateField("Date", blank=True, default=timezone.now, null=True)
+    gravity_2 = models.DecimalField("Gravity Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter a gravity (plato).")
+    gravity_2_date = models.DateField("Date", blank=True, default=timezone.now, null=True)
+    gravity_3 = models.DecimalField("Gravity Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter a gravity (plato).")
+    gravity_3_date = models.DateField("Date", blank=True, default=timezone.now, null=True)   
     final_gravity = models.DecimalField("Final gravity", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final gravity.")
     attenuation = models.DecimalField("Attenuation %", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Attenuation %.")
     final_abv = models.DecimalField("Final abv", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Final abv.")
@@ -274,7 +338,7 @@ class Hop(MetaBase):
 
     amount = models.DecimalField("amount", max_digits=14, decimal_places=2,
             help_text="Weight in pounds of the hops used in the recipe.")
-    amt_units = models.CharField("Units", max_length=50, choices=USE,
+    amt_units = models.CharField("Units", max_length=50, choices=UNITS,
             help_text="""The unit of measure used for this hop instance.""", default="LB")
     use = models.CharField("usage", max_length=50, choices=USE,
             help_text="""The phase at which this hop is added.""")
@@ -282,7 +346,7 @@ class Hop(MetaBase):
 
 
     def __str__(self):
-        return str(self.amount) + "# " + self.name + self.use
+        return str(self.amount) + str(self.amt_units) + " " + self.name + self.use
 
 
 
