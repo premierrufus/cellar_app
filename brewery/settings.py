@@ -12,6 +12,16 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 
+
+# Import socket to read host name
+import socket
+
+# if hostname starts with mbp, it's on my machine
+if socket.gethostname().startswith('mbp'):
+    DJANGO_HOST = "development"
+else: # if not, it's on PA
+    DJANGO_HOST = "production"
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,7 +35,10 @@ SECRET_KEY = 'y-%i-pbv)c_@m-6(w^zrah_fgc9#c^&)l-+swdwlu7ia(sj!=f'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['cellar.bhlocal.me', '127.0.0.1']
+if DJANGO_HOST == "development":
+    ALLOWED_HOSTS = ['127.0.0.1']
+else:
+    ALLOWED_HOSTS = ['cellar.bhlocal.me']
 
 
 # Application definition
@@ -53,21 +66,38 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'brewery.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates', '/home/helperbot/brewery/templates'],
-        'APP_DIRS': False,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
+if DJANGO_HOST == "production":
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': ['/home/helperbot/brewery/templates'],
+            'APP_DIRS': False,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
         },
-    },
-]
+    ]
+else:
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': ['templates', '/home/helperbot/brewery/templates'],
+            'APP_DIRS': False,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
+        },
+    ]
 
 WSGI_APPLICATION = 'brewery.wsgi.application'
 
@@ -75,12 +105,24 @@ WSGI_APPLICATION = 'brewery.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
-DATABASES = {
+if DJANGO_HOST == "production":
+    DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'brewerydb',
+        'USER': 'cellar_user',
+        'PASSWORD': 'pg_bu_password_strong_04005',
+        'HOST': 'helperbot-674.postgres.pythonanywhere-services.com',
+        'PORT': 10674,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
