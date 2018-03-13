@@ -1,8 +1,10 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 from .models import Batch, Container, Recipe
 
+@login_required
 def index(request):
     """
     View function for home page of site.
@@ -25,31 +27,32 @@ def index(request):
 
 from django.views import generic
 
+@login_required
 class ContainerListView(generic.ListView):
     model = Container
     queryset = Container.objects.filter(name__icontains='F') # Get all Fermentation containers containing
 
 
-
+@login_required
 class ContainerDetailView(generic.DetailView):
     model = Container
 
 
-
+@login_required
 class BatchListView(generic.ListView):
     model = Batch
 
 
-
+@login_required
 class BatchDetailView(generic.DetailView):
     model = Batch
 
 
-
+@login_required
 class RecipeListView(generic.ListView):
     model = Recipe
 
 
-
+@login_required
 class RecipeDetailView(generic.DetailView):
     model = Recipe
