@@ -48,11 +48,11 @@ class BatchDetailView(generic.DetailView):
     model = Batch
 
 
-@login_required
+
 class RecipeListView(generic.ListView):
     model = Recipe
 
 
-@login_required
+
 class RecipeDetailView(generic.DetailView):
     model = Recipe
