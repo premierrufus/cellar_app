@@ -1,9 +1,15 @@
 from django.contrib import admin, messages
-#from django.contrib.admin import AdminSite
+from django.urls import path
 from django.shortcuts import render
+from django.utils.html import format_html
+from django.urls import reverse
+from django.utils.safestring import mark_safe 
+from django.utils.translation import ugettext as _
+
 from .models import Batch, Barrel, Container, Fermentable, Hop, Salt, Misc, Yeast, Recipe
 
 from brewing.forms import TransferForm
+
 # Register your models here.
 
 
@@ -12,7 +18,7 @@ admin.site.register(Fermentable)
 admin.site.register(Salt)
 admin.site.register(Misc)
 admin.site.register(Yeast)
-admin.site.register(Recipe)
+#admin.site.register(Recipe)
 
 @admin.register(Batch)
 class BatchAdmin(admin.ModelAdmin):
@@ -84,3 +90,19 @@ class HopAdmin(admin.ModelAdmin):
 @admin.register(Container)
 class ContainerAdmin(admin.ModelAdmin):
     list_display = ('name', 'container_type', 'capacity', 'get_contents')
+
+
+
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'view_link')
+
+    def view_link(self, obj):
+        return mark_safe(
+            '<a href="{0}">{1}</a>'.format(
+                obj.get_absolute_url(),
+                _("View")
+            )
+        )
+    view_link.allow_tags = True
+    view_link.short_description = _("Recipe Details")

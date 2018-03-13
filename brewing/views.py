@@ -36,7 +36,6 @@ class ContainerDetailView(generic.DetailView):
 
 
 
-
 class BatchListView(generic.ListView):
     model = Batch
 

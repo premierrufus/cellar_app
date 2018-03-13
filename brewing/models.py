@@ -7,7 +7,7 @@ from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.urls import reverse
-
+from django.utils.html import format_html
 
 
 class MetaBase(models.Model):
@@ -389,7 +389,15 @@ class Hop(MetaBase):
     notes = models.TextField("notes", blank=True, null=True)
 
 
+    def get_hop_inst(self):
+        '''
+        returns the details for a hop instance
+        '''
+        return self.use + '=> ' + str(self.amount) + str(self.amt_units) + " " + self.name
+
+
     def __str__(self):
+        # return self.use + '=> ' + str(self.amount) + str(self.amt_units) + " " + self.name 
         return str(self.amount) + str(self.amt_units) + " " + self.name + self.use
 
 
@@ -552,11 +560,11 @@ class Recipe(MetaBase):
     notes = models.TextField("notes", blank=True, null=True)
 
 
+    # def get_recipe_details(self):
+    #     return format_html('<a href="{}">{}</a>', self.get_absolute_url, self.name)
+    # get_recipe_details.short_description = "View Recipe Details"
+
     
     def get_absolute_url(self):
         return reverse('recipe-detail', args=[str(self.pk)])
-
-
-
-
 

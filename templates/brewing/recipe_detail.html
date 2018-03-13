@@ -18,7 +18,7 @@
   <p><strong>Hops:</strong></p> <!-- author detail link not yet defined -->
   <ul class="list-group">
   {% for hop in recipe.hops.get_queryset %}
-    <li class="list-group-item">{{ hop }}</li>
+    <li class="list-group-item">{{ hop.get_hop_inst }}</li>
   {% endfor %}
   </ul>
   {% endif %}
