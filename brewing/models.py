@@ -318,6 +318,9 @@ class Batch(models.Model):
         #return str(self.gyle)
 
 
+    def get_absolute_url(self):
+        return reverse('batch-detail', args=[str(self.pk)])
+
     class Meta:
         verbose_name_plural = 'Batches'
 
@@ -547,3 +550,13 @@ class Recipe(MetaBase):
     miscs = models.ManyToManyField(Misc, blank=True, null=True, help_text="Zero or more misc records")
     yeasts = models.ManyToManyField(Yeast, blank=True, null=True, help_text="Zero or more yeast records")
     notes = models.TextField("notes", blank=True, null=True)
+
+
+    
+    def get_absolute_url(self):
+        return reverse('recipe-detail', args=[str(self.pk)])
+
+
+
+
+

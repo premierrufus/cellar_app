@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Batch List</h1>
+
+    {% if batch_list %}
+    <div class="row ">
+
+      {% for batch in batch_list %}
+      <div class="col-sm-3" style="border:1px solid black;">
+        <h1 class="text-center">{{ batch.ferm_tank }}</h1>
+        <h2 class="text-center"><a href="{{ batch.get_absolute_url }}">{{ batch.gyle }}</a></h2>
+        <p class="lead">{{batch.brewer|title}}</p>
+      </div>
+      {% endfor %}
+
+    </div>
+    {% else %}
+      <p>There are no batches in the brewery.</p>
+    {% endif %}       
+{% endblock %}

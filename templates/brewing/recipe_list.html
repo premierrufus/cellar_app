@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Recipe List</h1>
+
+    {% if recipe_list %}
+    <div class="row ">
+
+      {% for recipe in recipe_list reversed%}
+      <div class="col-sm-2" style="border:2px solid #444444;border-radius:5px;margin:1px;">
+        <h2 class="text-center"><a href="{{ recipe.get_absolute_url }}">{{ recipe.name }}</a></h2>
+        <p class="lead text-center">{{ container.get_recipe }}</p>
+      </div>
+      {% endfor %}
+
+    </div>
+    {% else %}
+      <p>There are no recipes in the brewery.</p>
+    {% endif %}       
+{% endblock %}

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 # Create your views here.
-from .models import Batch, Container
+from .models import Batch, Container, Recipe
 
 def index(request):
     """
@@ -44,3 +44,13 @@ class BatchListView(generic.ListView):
 
 class BatchDetailView(generic.DetailView):
     model = Batch
+
+
+
+class RecipeListView(generic.ListView):
+    model = Recipe
+
+
+
+class RecipeDetailView(generic.DetailView):
+    model = Recipe

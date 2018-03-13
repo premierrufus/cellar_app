@@ -1,0 +1,40 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<br />
+<div class="well">
+  <h1><a href="{{ recipe.get_absolute_url }}">{{ recipe.name }}</a></h1>
+  <hr>
+  {% if recipe.fermentables %}
+  <p><strong>Fermentables:</strong></p>
+  <ul class="list-group">
+  {% for fermentable in recipe.fermentables.get_queryset %}
+    <li class="list-group-item">{{ fermentable }}</li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if recipe.hops %}
+  <p><strong>Hops:</strong></p> <!-- author detail link not yet defined -->
+  <ul class="list-group">
+  {% for hop in recipe.hops.get_queryset %}
+    <li class="list-group-item">{{ hop }}</li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if recipe.salts %}
+  <p><strong>Salts:</strong></p> <!-- author detail link not yet defined -->
+  <ul class="list-group">
+  {% for salt in recipe.salts.get_queryset %}
+    <li class="list-group-item">{{ salt }}</li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if recipe.notes %}
+  <p><strong>Recipe Notes:</strong></p> <!-- author detail link not yet defined -->
+  <p>{{ recipe.notes }}</p>
+  {% endif %}
+</div>
+{% endblock %}
