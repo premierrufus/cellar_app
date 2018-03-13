@@ -27,7 +27,7 @@ def index(request):
 
 from django.views import generic
 
-@login_required
+
 class ContainerListView(generic.ListView):
     model = Container
     queryset = Container.objects.filter(name__icontains='F') # Get all Fermentation containers containing
