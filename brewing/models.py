@@ -322,7 +322,6 @@ class Batch(models.Model):
         return reverse('batch-detail', args=[str(self.pk)])
 
     class Meta:
-        ordering = ['-brew_date']
         verbose_name_plural = 'Batches'
 
 

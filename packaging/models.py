@@ -148,7 +148,11 @@ class Package(models.Model):
 
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # Call the "real" save() method. 
+        super().save(*args, **kwargs)  # Call the "real" save() method.
+
+
+    class Meta:
+        ordering = ['-package_date']
 
 
 class Aging(models.Model):
