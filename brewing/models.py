@@ -272,15 +272,13 @@ class Batch(models.Model):
     transfer_tank = models.ForeignKey(Container, limit_choices_to=Q(container_type='B') | Q(container_type='A'),
         default='', related_name='batch_transfer_tank', verbose_name="Transfer Tank", on_delete=models.CASCADE, blank=True, null=True)
     transfer_date = models.DateField(blank=True, default=timezone.now, null=True)
-    pre_transfer_vol = models.DecimalField("Pre Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, 
-        help_text="Pre Transfer Batch Volume.")
     post_transfer_vol = models.DecimalField("Post Transfer Batch Volume", max_digits=5, decimal_places=2, blank=True, null=True, 
         help_text="Post Transfer Batch Volume.")
     transfer_cip = models.BooleanField('CIP?', default=False, 
         help_text="Tick this box if the destination container was cleaned prior to transfer.")
-    first_dry_hop = models.DateField(blank=True, default=timezone.now, null=True)
-    second_dry_hop = models.DateField(blank=True, default=timezone.now, null=True)
-    d_rest = models.DateField(blank=True, default=timezone.now, null=True)
+    first_dry_hop = models.DateField(blank=True, null=True)
+    second_dry_hop = models.DateField(blank=True, null=True)
+    d_rest = models.DateField(blank=True, null=True)
     gravity_1 = models.DecimalField("Gravity Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter a gravity (plato).")
     gravity_1_date = models.DateField("Date", blank=True, default=timezone.now, null=True)
     gravity_2 = models.DecimalField("Gravity Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter a gravity (plato).")

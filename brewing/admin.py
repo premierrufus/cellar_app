@@ -54,7 +54,7 @@ class BatchAdmin(admin.ModelAdmin):
         }),
         ('Transfer Data', {
             'classes': ('collapse',),
-            'fields': ('pre_transfer_vol', 'post_transfer_vol', 'transfer_cip', 'transfer_date', 'transfer_tank', 'transfer_log')
+            'fields': ('post_transfer_vol', 'transfer_cip', 'transfer_date', 'transfer_tank', 'transfer_log')
         }),
         ('Logs', {
             'classes': ('collapse',),
