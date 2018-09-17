@@ -35,6 +35,7 @@ class BatchAdmin(admin.ModelAdmin):
                 'brewer',
                 'asst_brewer',
                 'mash_temperature',
+                'post_boil_ph',
                 'preboil_gravity',
                 'preboil_volume',
                 'postboil_gravity',
@@ -46,6 +47,11 @@ class BatchAdmin(admin.ModelAdmin):
                 'second_dry_hop',
                 'd_rest'
             )
+        }),
+
+        ('Oxygen Data', {
+            'classes': ('collapse',),
+            'fields': ('post_dry_hop_oxygen_ppb', 'pre_transfer_oxygen_ppb', 'post_transfer_oxygen_ppb')
         }),
 
         ('Gravity Log', {

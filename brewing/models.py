@@ -240,7 +240,7 @@ class Batch(models.Model):
         ("sean", "Sean"),
         ("shea", "Shea"),
         ("ian", "Ian"),
-        ("ron", "Ron"),
+        ("richard", "Richard"),
         ("brandon", "Brandon")
     )
 
@@ -291,6 +291,14 @@ class Batch(models.Model):
     transfer_log = models.TextField("Transfer Log", blank=True, null=True, help_text="Enter any transfer notes here.")
     cellaring_log = models.TextField("Cellaring Log", blank=True, null=True, help_text="Enter any cellaring notes here.")
     notes = models.TextField("Batch Notes", blank=True, null=True, help_text="Enter batch notes here.")
+    
+    # new edits begin here 09/17/18
+    post_dry_hop_oxygen_ppb = models.DecimalField("Post Dry Hop 02", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
+    pre_transfer_oxygen_ppb = models.DecimalField("Pre Transfer 02", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
+    post_transfer_oxygen_ppb = models.DecimalField("Post Transfer 02", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
+    post_boil_ph = models.DecimalField("Post Boil ph", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter post boil ph.")
+    # new edits end here 09/17/18
+
     cdt = models.DateTimeField("created", editable=False, auto_now_add=True)
     mdt = models.DateTimeField("modified", editable=False, auto_now=True)
 
