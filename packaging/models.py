@@ -111,6 +111,7 @@ class Package(models.Model):
         help_text="Total packaged quantity for this format in cases/units (NOT BBL).", blank=True, null=True)
     batches = models.ManyToManyField('brewing.batch', help_text="Batches associated with this packaging event.",
         blank=True, null=True, verbose_name="Source Batches")
+    oxygen_log = models.DecimalField("Packaging Oxygen Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
 
 
     def get_packaged_bbl(self):
