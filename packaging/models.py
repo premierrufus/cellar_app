@@ -72,8 +72,8 @@ def get_production_by_month(m, y):
         else:
             monthly_racking += to_bbl(p.format_type, p.format_qty)
     #return monthly_racking, monthly_bottling
-    print(m, "Racking Volume:", monthly_racking)
-    print(m, "Bottling Volume:", monthly_bottling)
+    print(m, y, "Racking Volume:", monthly_racking)
+    print(m, y, "Bottling Volume:", monthly_bottling)
 
 
 
