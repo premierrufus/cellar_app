@@ -43,6 +43,39 @@ def to_bbl(f, q):
             return v.quantize(Decimal('1.00'))
 
 
+def get_production_by_month(m, y):
+    """
+    Takes two arguments: month, year
+    returns total racking volume in bbl
+    """
+    MONTHS = {
+        'January': 1,
+        'February': 2,
+        'March': 3,
+        'April': 4,
+        'May': 5,
+        'June': 6,
+        'July': 7,
+        'August': 8,
+        'September': 9,
+        'October': 10,
+        'November': 11,
+        'December': 12
+    }
+
+    monthly_racking = 0
+    monthly_bottling = 0
+    packages = Package.objects.filter(package_date__month=(MONTHS[m]), package_date__year=y)
+    for p in packages:
+        if 'CS' in p.format_type:
+            monthly_bottling += to_bbl(p.format_type, p.format_qty)
+        else:
+            monthly_racking += to_bbl(p.format_type, p.format_qty)
+    #return monthly_racking, monthly_bottling
+    print(m, "Racking Volume:", monthly_racking)
+    print(m, "Bottling Volume:", monthly_bottling)
+
+
 
 def get_many_objects(queryset):
     """
