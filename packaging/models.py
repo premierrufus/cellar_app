@@ -147,6 +147,7 @@ class Package(models.Model):
     oxygen_log = models.DecimalField("Packaging Oxygen Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
 
 
+
     def get_packaged_bbl(self):
         return to_bbl(self.format_type, self.format_qty)
     get_packaged_bbl.short_description = 'Packaged Vol(bbl)'
