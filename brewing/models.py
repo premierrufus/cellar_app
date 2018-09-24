@@ -240,8 +240,7 @@ class Batch(models.Model):
         ("sean", "Sean"),
         ("shea", "Shea"),
         ("ian", "Ian"),
-        ("richard", "Richard"),
-        ("brandon", "Brandon")
+        ("richard", "Richard")
     )
 
     YEAST_TYPES = (
@@ -296,7 +295,9 @@ class Batch(models.Model):
     post_dry_hop_oxygen_ppb = models.DecimalField("Post Dry Hop 02", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
     pre_transfer_oxygen_ppb = models.DecimalField("Pre Transfer 02", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
     post_transfer_oxygen_ppb = models.DecimalField("Post Transfer 02", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
+    pre_boil_ph = models.DecimalField("Pre Boil ph", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter pre boil ph.")
     post_boil_ph = models.DecimalField("Post Boil ph", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter post boil ph.")
+    mash_ph = models.DecimalField("Mash ph", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter mash ph.")
     # new edits end here 09/17/18
 
     cdt = models.DateTimeField("created", editable=False, auto_now_add=True)

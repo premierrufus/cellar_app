@@ -35,6 +35,8 @@ class BatchAdmin(admin.ModelAdmin):
                 'brewer',
                 'asst_brewer',
                 'mash_temperature',
+                'mash_ph',
+                'pre_boil_ph',
                 'post_boil_ph',
                 'preboil_gravity',
                 'preboil_volume',
