@@ -4,7 +4,7 @@
 <div><!-- DIV needed for valid HTML -->
 <label for="searchbar"><img src="{% static "admin/img/search.svg" %}" alt="Search" /></label>
 {% if cl.query %}
-<input type="text" size="40" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" autofocus />
+<input type="text" size="40" name="{{ search_var }}" placeholder="Recipe Name" value="{{ cl.query }}" id="searchbar" autofocus />
 {% else %}
 <input type="text" size="40" name="{{ search_var }}" placeholder="Recipe Name" id="searchbar" autofocus />
 {% endif %}
