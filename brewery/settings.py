@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-
+from decouple import config
 
 # Import socket to read host name
 import socket
@@ -30,7 +30,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'y-%i-pbv)c_@m-6(w^zrah_fgc9#c^&)l-+swdwlu7ia(sj!=f'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -109,11 +109,11 @@ if DJANGO_HOST == "production":
     DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'brewerydb',
-        'USER': 'cellar_user',
-        'PASSWORD': 'pg_bu_password_strong_04005',
-        'HOST': 'helperbot-674.postgres.pythonanywhere-services.com',
-        'PORT': 10674,
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST': config('DATABASE_HOST'),
+        'PORT': config('DATABASE_PORT'),
         }
     }
 else:
