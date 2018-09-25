@@ -104,6 +104,7 @@ class ContainerAdmin(admin.ModelAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'view_link')
+    filter_horizontal = ('hops', 'fermentables')
 
     def view_link(self, obj):
         return mark_safe(
