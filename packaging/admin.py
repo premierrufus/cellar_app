@@ -37,17 +37,25 @@ class PackageAdmin(admin.ModelAdmin):
 	def export_as_csv(self, request, queryset):
 		"""
 		exports selected rows to CSV
+		modified from original source: 
+		https://books.agiliq.com/projects/django-admin-cookbook/en/latest/export.html
 		"""
-		meta = self.model._meta
-		field_names = [field.name for field in meta.fields]
+		#meta = self.model._meta
+		#field_names = [field.name for field in meta.fields]
+
+		#for batch in self.batches.all():
+		#	field_names.append(self.batches.first().recipe.name)
 
 		response = HttpResponse(content_type='text/csv')
-		response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
+		#response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
+		response['Content-Disposition'] = 'attachment;filename="package_export.csv"'
 		writer = csv.writer(response)
 
-		writer.writerow(field_names)
+		#writer.writerow(field_names)
+		writer.writerow(['Package Date', 'Format Type', 'Format Qty', 'Source Batch', 'Source Recipe'])
 		for obj in queryset:
-			row = writer.writerow([getattr(obj,field) for field in field_names])
+			#row = writer.writerow([getattr(obj,field) for field in field_names])
+			row = writer.writerow([obj.package_date, obj.format_type, obj.format_qty, obj.batches.first().gyle, obj.batches.first().recipe.name])
 
 		return response
 	export_as_csv.short_description = "Export selected packages (csv)"
