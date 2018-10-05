@@ -137,13 +137,13 @@ class Package(models.Model):
         ('Pin (5.4g)', 'Pin (5.4g)'),
     )
 
-    package_date = models.DateField(default=timezone.now, blank=True, verbose_name="Date Packaged")
-    packager = models.CharField("packager", max_length=100, choices=PACKAGER_NAME, blank=True, null=True)
-    format_type = models.CharField("Format", max_length=20, choices=TYPE, blank=True, null=True)
+    package_date = models.DateField(default=timezone.now, blank=False, verbose_name="Date Packaged")
+    packager = models.CharField("packager", max_length=100, choices=PACKAGER_NAME, blank=False)
+    format_type = models.CharField("Format", max_length=20, choices=TYPE, blank=False)
     format_qty = models.DecimalField("Packaged Units", max_digits=10, decimal_places=2,
-        help_text="Total packaged quantity for this format in cases/units (NOT BBL).", blank=True, null=True)
+        help_text="Total packaged quantity for this format in cases/units (NOT BBL).", blank=False)
     batches = models.ManyToManyField('brewing.batch', help_text="Batches associated with this packaging event.",
-        blank=True, null=True, verbose_name="Source Batches")
+        blank=False, verbose_name="Source Batches")
     oxygen_log = models.DecimalField("Packaging Oxygen Log", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter measured oxygen (ppb).")
 
     def get_packaged_bbl(self):
