@@ -70,7 +70,7 @@ if DJANGO_HOST == "production":
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': ['/home/helperbot/brewery/templates'],
+            'DIRS': ['/home/helperbot/cellar_app/templates'],
             'APP_DIRS': False,
             'OPTIONS': {
                 'context_processors': [
