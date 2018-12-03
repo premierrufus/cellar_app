@@ -22,7 +22,7 @@ admin.site.register(Yeast)
 
 @admin.register(Batch)
 class BatchAdmin(admin.ModelAdmin):
-    list_display = ('gyle', 'recipe', 'brew_date', 'brewer', 'ferm_tank', 'transfer_tank')
+    list_display = ('gyle', 'recipe', 'brew_date', 'brewer', 'ferm_tank', 'substitutions')
     fieldsets = (
         ('Batch Data', {
             'classes': ('wide',),
@@ -65,8 +65,8 @@ class BatchAdmin(admin.ModelAdmin):
             'fields': ('post_transfer_vol', 'transfer_cip', 'transfer_date', 'transfer_tank', 'transfer_log')
         }),
         ('Logs', {
-            'classes': ('collapse',),
-            'fields': ('cellaring_log', 'notes')
+            'classes': ('wide',),
+            'fields': ('cellaring_log', 'notes', 'substitutions')
         })
     )
     actions = ['set_transfer_tank']

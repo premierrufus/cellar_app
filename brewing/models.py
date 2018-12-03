@@ -300,6 +300,10 @@ class Batch(models.Model):
     mash_ph = models.DecimalField("Mash ph", max_digits=5, decimal_places=2, blank=True, null=True, help_text="Enter mash ph.")
     # new edits end here 09/17/18
 
+    # new edits begin here 12/3/18
+    substitutions = models.TextField("Substitutions", blank=True, null=True, help_text="Please record ingredient substitutions here.")
+    # new edits end here 12/3/18
+
     cdt = models.DateTimeField("created", editable=False, auto_now_add=True)
     mdt = models.DateTimeField("modified", editable=False, auto_now=True)
 
