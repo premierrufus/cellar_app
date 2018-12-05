@@ -23,6 +23,9 @@
       {% block sidebar %}
       <ul class="sidebar-nav">
           <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'containers' %}">All Containers</a></li>
+          <li><a href="{% url 'batches' %}">All Batches</a></li>
+          <li><a href="{% url 'recipes' %}">All Recipes</a></li>
           <li><a href="{% url 'admin:index' %}">Admin</a></li>
       </ul>
      {% endblock %}

@@ -554,7 +554,7 @@ class Recipe(MetaBase):
     Database model for reciepes
     """
     pre_boil_batch_size = models.DecimalField("pre boil batch size", max_digits=14, decimal_places=9, help_text="Target pre boil batch size in hectoliters.")
-    pre_boil_gravity = models.DecimalField("pre boil gravity", max_digits=14, decimal_places=9, help_text="Target pre boil gravity(Brix).")
+    pre_boil_gravity = models.DecimalField("pre boil gravity", max_digits=14, decimal_places=9, help_text="Target pre boil gravity(Plato).")
     fermentation_temp = models.DecimalField("fermentation temperature", max_digits=5, decimal_places=2, help_text="Target fermentation temperature (F)")
     mash_temp = models.DecimalField("mash temperature", max_digits=5, decimal_places=2, help_text="Target mash temperature (F)")
     strike_temperature = models.DecimalField("strike temperature", max_digits=5, decimal_places=2, help_text="Target strike temperature (F)")
